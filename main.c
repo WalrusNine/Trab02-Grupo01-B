@@ -4,7 +4,7 @@
 **	Docente:	Prof. Julio Cezar Estrella
 **
 **	Discentes:	Andre Miguel Coelho Leite	8626249
-**				Laerte Vidal Junior			7557800
+**			Laerte Vidal Junior		7557800
 **
 **	Trabalho 2:	Smooth com/sem threads
 */
@@ -30,21 +30,21 @@
 **
 **	SMOOTH
 **	5x5
-**	(i-2,j-2)	(i-1,j-2)	(i  ,j-2)		(i+1,j-2)	(i+2,j-2)
-**	(i-2,j-1)	(i-1,j-1)	(i  ,j-1)		(i+1,j-1)	(i+2,j-1)
-**	(i-2,   j)	(i-1,   j)	(i  ,   j)		(i+1,   j)	(i+2,  j)
+**	(i-2,j-2)	(i-1,j-2)	(i  ,j-2)	(i+1,j-2)	(i+2,j-2)
+**	(i-2,j-1)	(i-1,j-1)	(i  ,j-1)	(i+1,j-1)	(i+2,j-1)
+**	(i-2,  j)	(i-1,  j)	(i  ,  j)	(i+1,  j)	(i+2,  j)
 **	(i-2,j+1)	(i-1,j+1)	(i  ,j+1)	(i+1,j+1)	(i+2,j+1)
 **	(i-2,j+2)	(i-1,j+2)	(i  ,j+2)	(i+1,j+2)	(i+2,j+2)
 */
 
 /* RGB PIXEL */
 typedef struct{
-  unsigned char r, g, b;
+	unsigned char r, g, b;
 }PIXELRGB;
 
 /* GRAYSCALE PIXEL */
 typedef struct{
-  unsigned char i;
+	unsigned char i;
 }PIXELGRS;
 
 /* UNION for keeping either grayscale or rgb PIXEL */
@@ -54,8 +54,8 @@ typedef union{
 } PIXEL;
 
 typedef struct image{
-  PIXEL* pixel;
-  int width, height;
+	PIXEL* pixel;
+	int width, height;
 }IMAGE;
 
 /* Prototypes */
@@ -75,8 +75,8 @@ int main(int argc, char** argv)
 {
 	MPI_Datatype stype;
 	
-	int		rank, numtasks;
-	int		lines_per_proc, total_size, lines, width;
+	int	rank, numtasks;
+	int	lines_per_proc, total_size, lines, width;
 	IMAGE* 	image;
 	PIXEL*	gpixels;
 	
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 		
 		/* Each process will have n number of lines to process (0 - n*width...) */
 		lines_per_proc 	= lines/numtasks;
-		width 			= image->width;
+		width 		= image->width;
 		
 		/* Save copy of pixels address for other processess */
 		gpixels = image->pixel;
@@ -113,7 +113,7 @@ int main(int argc, char** argv)
 	
 	/* Broadcast variables needed in all processess */
 	MPI_Bcast(&lines_per_proc, 	1, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&width, 			1, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(&width,		1, MPI_INT, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&total_size, 		1, MPI_INT, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&gpixels, 		1, MPI_INT, 0, MPI_COMM_WORLD);
 	MPI_Bcast(&grayscale, 		1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -219,12 +219,12 @@ IMAGE* read_ppm_image()
 	if (type[1] == '5') grayscale = 1;
 	
 	/* Check for comments */
-    char c = getc(fp);
-    while (c == '#') {
+	char c = getc(fp);
+	while (c == '#') {
 		while (getc(fp) != '\n');
 		c = getc(fp);
-    }
-    ungetc(c, fp);
+	}
+	ungetc(c, fp);
 
 	/* Get Size */
 	int width, height;
