@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/time.h>
 #include <omp.h>
 #include "mpi.h"
 
@@ -68,6 +69,8 @@ MPI_Datatype create_mpi_struct_datatype();
 void smooth_grs(PIXEL*,int, int, int);
 void smooth_rgb(PIXEL*,int, int, int);
 
+int timeval_subtract(struct timeval*, struct timeval*, struct timeval*);
+
 /* Globals */
 int grayscale = 0;
 
@@ -79,6 +82,9 @@ int main(int argc, char** argv)
 	int	lines_per_proc, total_size, lines, width;
 	IMAGE* 	image;
 	PIXEL*	gpixels;
+
+	/* Time variables */
+	struct timeval t_begin, t_end, t_diff;
 	
 	/* Initialize MPI */
 	int rc = MPI_Init(&argc,&argv);
@@ -109,6 +115,9 @@ int main(int argc, char** argv)
 		
 		/* Save copy of pixels address for other processess */
 		gpixels = image->pixel;
+
+		/* Get time start */
+		gettimeofday(&t_begin, NULL);
 	}
 	
 	/* Broadcast variables needed in all processess */
@@ -149,14 +158,22 @@ int main(int argc, char** argv)
 	*/
 	if (rank == 0){
 		if (lines%numtasks != 0){
-			//Work on rest
+			/* Work on rest */
 			int rest 	= lines%numtasks;
 			PIXEL* pm 	= image->pixel + lines*width;
 			
 			if (grayscale) smooth_grs(pm, 2, width, rest);
 			else smooth_rgb(pm, 2, width, rest);
 		}
-		
+
+		/* Get time end */
+		gettimeofday(&t_end, NULL);
+
+		/* Get diff time and print in stderr */
+		timeval_subtract(&t_diff, &t_end, &t_begin);
+		fprintf(stderr, "%ld.%06ld\n", t_diff.tv_sec, t_diff.tv_usec);
+
+		/* Write resulting image */
 		write_ppm("out.ppm",image,RGB);
 		
 		delete_image(&image);
@@ -366,4 +383,20 @@ void delete_image(IMAGE** image){
 		free(*image);
 		*image = NULL;
 	}
+}
+
+
+/*
+**	Snippet from:
+**	http://stackoverflow.com/questions/1468596/calculating-elapsed-time-in-a-c-program-in-milliseconds
+*/
+
+/* Return 1 if the difference is negative, otherwise 0.  */
+int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval *t1)
+{
+	long int diff = (t2->tv_usec + 1000000 * t2->tv_sec) - (t1->tv_usec + 1000000 * t1->tv_sec);
+	result->tv_sec = diff / 1000000;
+	result->tv_usec = diff % 1000000;
+
+	return (diff<0);
 }
