@@ -160,7 +160,7 @@ int main(int argc, char** argv)
 		if (lines%numtasks != 0){
 			/* Work on rest */
 			int rest 	= lines%numtasks;
-			PIXEL* pm 	= image->pixel + lines*width;
+			PIXEL* pm 	= image->pixel + (lines - rest)*width;
 			
 			if (grayscale) smooth_grs(pm, 2, width, rest);
 			else smooth_rgb(pm, 2, width, rest);
